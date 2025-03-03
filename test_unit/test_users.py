@@ -67,3 +67,22 @@ def test_updated_user_error():
     assert response.status_code == 200
     assert response.json()['message'] == 'No se ha encontrado el usuario a modificar.'
 
+def test_delete_user():
+    get_response = client.get("/users")
+    len_old = len(get_response.json())
+
+    id = 2
+    response = client.delete("/user/" + str(id))
+
+    assert response.status_code == 200
+    print(response.json())
+    assert response.json()['status'] == 'ok'
+    assert response.json()['message'] == 'Registro eliminado: ' + str(id)
+
+    get_response = client.get("/users")
+    len_new = len(get_response.json())
+    assert len_old - 1 == len_new
+
+    response = client.get("/user/" + str(id))
+    assert response.json()['status'] == 'error'
+    assert response.json()['message'] == 'No se ha encontrado el usuario.'
