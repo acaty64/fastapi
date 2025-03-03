@@ -39,9 +39,8 @@ def test_add_user():
 
     body = { "id":4, "name":"usuario_4", "age":20, "deactivate": False }
     response = client.post("/user", json=body)
-    print(response.json()['message'])
-    assert response.json()['message'] == 'Usuario agregado.'
     assert response.status_code == 200
+    assert response.json() == body
 
     get_response = client.get("/users")
     len_new = len(get_response.json())
@@ -50,3 +49,21 @@ def test_add_user():
     response = client.post("/user", json=body)
     print(response.json()['message'])
     assert response.json()['message'] == 'El usuario ya existe.'
+
+def test_updated_user():
+    id = 1
+    body = { "id":id, "name":"usuario modificado", "age":10, "deactivate": True }
+    response = client.put('/user', json=body)
+    print (response)
+    assert response.status_code == 200
+    get_response = client.get("/user/" + str(id))
+    assert response.json() == get_response.json()
+
+def test_updated_user_error():
+    id = 100
+    body = { "id":id, "name":"usuario modificado", "age":10, "deactivate": True }
+    response = client.put('/user', json=body)
+    print (response)
+    assert response.status_code == 200
+    assert response.json()['message'] == 'No se ha encontrado el usuario a modificar.'
+
