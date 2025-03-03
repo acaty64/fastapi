@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+import json
 
 app = FastAPI()
 
@@ -22,8 +23,7 @@ async def users():
 
 @app.get("/user/{id}")
 async def user(id: int):
-    users = filter(lambda user: user.id == id, users_list)
-    return list(users)[0]
+    return search_user( id )
 
 @app.get("/usersjson")
 async def usersjson():
@@ -31,16 +31,18 @@ async def usersjson():
         { "id" : 2, "name" : "usuario_2", "age": 38, "deactivate": False},
         { "id" : 3, "name" : "usuario_3", "age": 29, "deactivate": True }]
 
+@app.post("/user/")
+async def user(user:User):
+    if type(search_user(user.id)) == User:
+        return {'status': 'error', 'message': 'El usuario ya existe.'}
+    else:
+        users_list.append(user)
+        return {'status': 'Ok', 'message': 'Usuario agregado.'}
 
 
-# @app.post("/login")
-# async def login(user: str, password: str):
-#     if search_user(user).password != password:
-
-#     response = "acreditado"
-#     return {"user": user, "response": response}
-
-# def search_user(user: str):
-#     users = filter(lambda user: user.user == user, users_list)
-#     user = users_list[0]
-#     return user
+def search_user( id: int ):
+    users = filter(lambda user: user.id == id, users_list)
+    try:
+        return list(users)[0]
+    except:
+        return {'status': 'error', 'message': 'No se ha encontrado el usuario'}
