@@ -1,6 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status, HTTPException
 from pydantic import BaseModel
-import json
 
 app = FastAPI()
 
@@ -25,19 +24,38 @@ async def users():
 async def user(id: int):
     return search_user( id )
 
-@app.get("/usersjson")
+@app.get("/usersjson", status_code=status.HTTP_201_CREATED)
 async def usersjson():
     return [{"id" : 1, "name" : "usuario", "age": 25,"deactivate": False},
         { "id" : 2, "name" : "usuario_2", "age": 38, "deactivate": False},
         { "id" : 3, "name" : "usuario_3", "age": 29, "deactivate": True }]
 
-@app.post("/user/")
+@app.post("/user/", status_code=status.HTTP_201_CREATED)
 async def user(user:User):
     if type(search_user(user.id)) == User:
-        return {'status': 'error', 'message': 'El usuario ya existe.'}
-    else:
-        users_list.append(user)
-        return {'status': 'Ok', 'message': 'Usuario agregado.'}
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = 'El usuario ya existe.')
+
+    users_list.append(user)
+    return user
+
+@app.put("/user/")
+async def user(user:User):
+    for index, saved_used in enumerate(users_list):
+        if saved_used.id == user.id:
+            users_list[index] = user
+            return users_list[index]
+    raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = 'No se ha encontrado el usuario a modificar.')
+    # return {'status': 'error', 'message': 'No se ha encontrado el usuario a modificar.'}
+
+
+@app.delete("/user/{id}", status_code=status.HTTP_200_OK)
+async def user(id:int):
+    for index, saved_used in enumerate(users_list):
+        if saved_used.id == id:
+            item_deleted = users_list.pop(index)
+            return {'detail': 'Registro eliminado: ' + str(item_deleted.id)}
+    raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = 'No se ha encontrado el usuario a eliminar.')
+    # return {'status': 'error', 'message': 'No se ha encontrado el usuario a eliminar.'}
 
 
 def search_user( id: int ):
@@ -45,4 +63,5 @@ def search_user( id: int ):
     try:
         return list(users)[0]
     except:
-        return {'status': 'error', 'message': 'No se ha encontrado el usuario'}
+        #raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail='No se ha encontrado el usuario.')
+        return {'status': 404, 'detail': 'No se ha encontrado el usuario.'}
