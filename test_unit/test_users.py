@@ -7,9 +7,9 @@ client = TestClient(app)
 
 def test_usersjson():
     response = client.get("/usersjson")
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert type(response.json()) == list
-    print('len response: ', len(response.json()))
+    #print('len response: ', len(response.json()))
     assert len(response.json()) > 0
 
 
@@ -28,10 +28,10 @@ def test_user_by_id():
 
 def test_user_error_by_id():
     response = client.get("/user/100")
-    assert response.status_code == 200
-    # assert type(response.json()) == dict
     jsonResponse = response.json() 
-    assert jsonResponse['status'] == 'error'
+    print('test_user_error_by_id', jsonResponse)
+    assert jsonResponse['status'] == 404
+    assert jsonResponse['detail'] == 'No se ha encontrado el usuario.'
 
 def test_add_user():
     get_response = client.get("/users")
@@ -39,7 +39,7 @@ def test_add_user():
 
     body = { "id":4, "name":"usuario_4", "age":20, "deactivate": False }
     response = client.post("/user", json=body)
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert response.json() == body
 
     get_response = client.get("/users")
@@ -47,14 +47,13 @@ def test_add_user():
     assert len_old + 1 == len_new
 
     response = client.post("/user", json=body)
-    print(response.json()['message'])
-    assert response.json()['message'] == 'El usuario ya existe.'
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'El usuario ya existe.'
 
 def test_updated_user():
     id = 1
     body = { "id":id, "name":"usuario modificado", "age":10, "deactivate": True }
     response = client.put('/user', json=body)
-    print (response)
     assert response.status_code == 200
     get_response = client.get("/user/" + str(id))
     assert response.json() == get_response.json()
@@ -63,9 +62,8 @@ def test_updated_user_error():
     id = 100
     body = { "id":id, "name":"usuario modificado", "age":10, "deactivate": True }
     response = client.put('/user', json=body)
-    print (response)
-    assert response.status_code == 200
-    assert response.json()['message'] == 'No se ha encontrado el usuario a modificar.'
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'No se ha encontrado el usuario a modificar.'
 
 def test_delete_user():
     get_response = client.get("/users")
@@ -75,14 +73,12 @@ def test_delete_user():
     response = client.delete("/user/" + str(id))
 
     assert response.status_code == 200
-    print(response.json())
-    assert response.json()['status'] == 'ok'
-    assert response.json()['message'] == 'Registro eliminado: ' + str(id)
+    assert response.json()['detail'] == 'Registro eliminado: ' + str(id)
 
     get_response = client.get("/users")
     len_new = len(get_response.json())
     assert len_old - 1 == len_new
 
     response = client.get("/user/" + str(id))
-    assert response.json()['status'] == 'error'
-    assert response.json()['message'] == 'No se ha encontrado el usuario.'
+    assert response.json()['status'] == 404
+    assert response.json()['detail'] == 'No se ha encontrado el usuario.'
