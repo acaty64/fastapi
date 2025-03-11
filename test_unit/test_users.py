@@ -11,8 +11,8 @@ client = TestClient(router)
 
 def test_search_user():
     response = search_user(1)
-    print('prn test_search_user: ', response)
-    assert response.status_code == 200
+    # assert response['id'] == 1
+    assert response.id == 1
 
 def test_usersjson():
     response = client.get("/usersjson")
@@ -93,5 +93,5 @@ def test_delete_user():
     assert len_old - 1 == len_new
 
     response = client.get("/user/" + str(id))
-    assert response.json()['status'] == 404
+    assert response.json()['status_code'] == 404
     assert response.json()['detail'] == 'No se ha encontrado el usuario.'

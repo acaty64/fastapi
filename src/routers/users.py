@@ -1,5 +1,6 @@
 from fastapi import APIRouter, status, HTTPException
 from pydantic import BaseModel
+from fastapi.encoders import jsonable_encoder
 
 router = APIRouter()
 
@@ -16,11 +17,11 @@ users_list = [ User(id = 1, name = "usuario", age= 25, deactivate = False),
             User(id= 3, name = "usuario_3", age = 29, deactivate = True) ]
 
 
-@router.get("/users")
+@router.get("/users", status_code=status.HTTP_200_OK)
 async def users():
     return users_list
 
-@router.get("/user/{id}")
+@router.get("/user/{id}", status_code=status.HTTP_200_OK)
 async def user(id: int):
     return search_user( id )
 
@@ -59,9 +60,9 @@ async def user(id:int):
 
 
 def search_user( id: int ):
-    users = filter(lambda user: user.id == id, users_list)
     try:
+        users = filter(lambda user: user.id == id, users_list)
         return list(users)[0]
     except:
+        return {'status_code': 404, 'detail': 'No se ha encontrado el usuario.'}
         #raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail='No se ha encontrado el usuario.')
-        return {'status': 404, 'detail': 'No se ha encontrado el usuario.'}
