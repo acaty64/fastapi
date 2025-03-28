@@ -66,4 +66,12 @@ ROUTERS
     o import pytest
     o import httpx
 
-    
+********************************************
+JWT
+
+(.venv) pip install python-jose[cryptography]
+(.venv) pip install passlib[bcrypt]
+
+from jose import jwt 
+from passlib.context import CryptContext
+from datetime import datetime, timedelta
