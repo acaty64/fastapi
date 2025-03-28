@@ -29,7 +29,7 @@ def test_users():
 
 def test_user_by_id():
     resp = client.get("/users/")
-    print('test_user_by_id', resp.json())
+    #print('test_user_by_id', resp.json())
     response = client.get("/user/1")
     assert response.status_code == 200
     assert type(response.json()) == dict
