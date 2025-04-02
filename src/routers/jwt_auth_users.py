@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from jose import jwt, JWTError
@@ -9,7 +9,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_DURATION = 1 ### minuto
 SECRET_KEY = "secretsecret" ## o un Hexadecimal aleatorio
 
-app = FastAPI()
+router = APIRouter()
 
 oauth2 = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -78,7 +78,7 @@ async def current_user(user:User = Depends(auth_user)):
             detail="Usuario inactivo.")
     return user
 
-@app.post('/login')
+@router.post('/login')
 async def login(form: OAuth2PasswordRequestForm = Depends()):
     user_db = users_db.get(form.username)
     if not user_db:
@@ -102,6 +102,6 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
     }
 
 
-@app.get("/users/me", status_code=status.HTTP_200_OK)
+@router.get("/users/me", status_code=status.HTTP_200_OK)
 async def me(user: User = Depends(current_user)):
     return user

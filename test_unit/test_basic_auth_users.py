@@ -61,8 +61,6 @@ def test_login_user_me_disabled():
         "token_type": "bearer"
     }
 
-
-
     header = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer user2'
