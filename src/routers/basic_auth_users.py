@@ -1,10 +1,9 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
-app = FastAPI()
+router = APIRouter()
 
-#4:17:10
 oauth2 = OAuth2PasswordBearer(tokenUrl="login")
 
 # Entidad user
@@ -41,7 +40,7 @@ users_db = {
     },
 }
 
-@app.get('/')
+@router.get('/basic_auth_users/')
 async def root():
     return {"message": "Hello World from basic_auth_users.py"}
 
@@ -66,7 +65,7 @@ async def current_user(token: str = Depends(oauth2)):
             detail="Usuario inactivo.")
     return user
 
-@app.post('/login')
+@router.post('/login')
 async def login(form: OAuth2PasswordRequestForm = Depends()):
     user_db = users_db.get(form.username)
     if not user_db:
@@ -84,7 +83,7 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
         "token_type": "bearer"
     }
 
-@app.get("/users/me", status_code=status.HTTP_200_OK)
+@router.get("/users/me", status_code=status.HTTP_200_OK)
 async def me(user: User = Depends(current_user)):
     return user
 
